@@ -112,7 +112,9 @@ const render = () => {
       return `<div class="row news">
                 <div class="col-lg-4">
                     <img class="news-img-size"
-                        src="${imageUrl}" />
+                        src="${imageUrl}"
+                        onerror="this.onerror=null; this.src='https://breffee.net/data/editor/2210/20221013104826_fd5326c8ac17c04c88d91f03a8d313d8_5r8y.jpg';" />
+                        
                 </div>
                 <div class="col-lg-8">
                     <h2>${news.title}</h2>
