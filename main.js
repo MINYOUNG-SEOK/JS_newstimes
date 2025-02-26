@@ -35,14 +35,16 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 const attachEventListeners = () => {
-  document
-    .getElementById("search-toggle")
-    .addEventListener("click", toggleSearchBox);
-
+  // 검색 아이콘 클릭 시 검색창 토글
+  document.getElementById("search-toggle").addEventListener("click", () => {
+    const searchBox = document.getElementById("search-box");
+    searchBox.classList.toggle("show"); // 검색창 표시/숨김
+  });
   document
     .getElementById("search-button")
     .addEventListener("click", getNewsByKeyword);
 
+  // 검색창에 엔터 클릭 시 검색 실행
   document
     .getElementById("search-input")
     .addEventListener("keypress", (event) => {
@@ -51,6 +53,30 @@ const attachEventListeners = () => {
         getNewsByKeyword();
       }
     });
+
+  // 햄버거 버튼 클릭 시 메뉴 토글
+  document.getElementById("hamburger-toggle").addEventListener("click", () => {
+    document.getElementById("side-menu").classList.add("show");
+  });
+
+  // 닫기 버튼 클릭 시 메뉴 닫기
+  document.getElementById("close-menu").addEventListener("click", () => {
+    document.getElementById("side-menu").classList.remove("show");
+  });
+
+  const categoryMenus = document.querySelectorAll(".nyt-menu li");
+  categoryMenus.forEach((menu) =>
+    menu.addEventListener("click", getNewsByCategory)
+  );
+
+  // 📌 사이드 메뉴 카테고리 클릭 이벤트 추가 + 메뉴 닫기
+  const sideMenuCategories = document.querySelectorAll(".side-menu ul li");
+  sideMenuCategories.forEach((menu) =>
+    menu.addEventListener("click", (event) => {
+      getNewsByCategory(event); // 뉴스 리스트 업데이트
+      document.getElementById("side-menu").classList.remove("show"); // 사이드 메뉴 닫기
+    })
+  );
 };
 
 const toggleSearchBox = () => {
@@ -60,7 +86,9 @@ const toggleSearchBox = () => {
 };
 
 const getNewsByKeyword = async () => {
-  const keyword = document.getElementById("search-input").value.trim();
+  const searchInput = document.getElementById("search-input");
+  const keyword = searchInput.value.trim();
+
   if (!keyword) return alert("검색어를 입력해주세요.");
 
   console.log("검색어:", keyword);
@@ -80,6 +108,8 @@ const getNewsByKeyword = async () => {
 
     newsList = data.articles;
     render();
+
+    searchInput.value = "";
   } catch (error) {
     console.error("검색 중 오류 발생:", error);
   }
