@@ -179,18 +179,24 @@ const errorRender = (errorMessage) => {
 
 const paginationRender = () => {
   const totalPages = Math.ceil(totalResults / pageSize);
-
   const pageGroup = Math.ceil(page / groupSize);
 
   let lastPage = pageGroup * groupSize;
-  if (lastPage > totalPages) {
-    lastPage = totalPages;
-  }
+  if (lastPage > totalPages) lastPage = totalPages;
 
   const firstPage =
     lastPage - (groupSize - 1) <= 0 ? 1 : lastPage - (groupSize - 1);
 
   let paginationHTML = ``;
+
+  if (page > 1) {
+    paginationHTML += `<li class="page-item" onclick="moveToPage(1)">
+                            <a class="page-link">&laquo;</a>
+                       </li>
+                       <li class="page-item" onclick="moveToPage(${page - 1})">
+                            <a class="page-link">&lsaquo;</a>
+                       </li>`;
+  }
 
   for (let i = firstPage; i <= lastPage; i++) {
     paginationHTML += `<li class="page-item ${i === page ? "active" : ""}"
@@ -198,14 +204,25 @@ const paginationRender = () => {
                             <a class="page-link">${i}</a>
                        </li>`;
   }
+
+  if (page < totalPages) {
+    paginationHTML += `<li class="page-item" onclick="moveToPage(${page + 1})">
+                            <a class="page-link">&rsaquo;</a>
+                       </li>
+                       <li class="page-item" onclick="moveToPage(${totalPages})">
+                            <a class="page-link">&raquo;</a>
+                       </li>`;
+  }
+
   document.querySelector(".pagination").innerHTML = paginationHTML;
 };
 
 const moveToPage = (pageNum) => {
-  console.log("movetoPage", pageNum);
+  if (pageNum < 1 || pageNum > Math.ceil(totalResults / pageSize)) return;
+
   page = pageNum;
   getNews();
-
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
+
 getLatesNews();
