@@ -114,6 +114,7 @@ const getNewsByKeyword = async () => {
 
   if (!keyword) return alert("검색어를 입력해주세요.");
 
+  page = 1;
   url = new URL(
     `https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=kr&q=${keyword}`
   );
