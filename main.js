@@ -6,28 +6,51 @@ menus.forEach((menu) =>
   menu.addEventListener("click", (event) => getNewsByCategory(event))
 );
 
+let url = new URL(
+  `https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=kr`
+);
+let totalResults = 0;
+let page = 1;
+const pageSize = 10;
+const groupSize = 5;
+
+const getNews = async () => {
+  try {
+    url.searchParams.set("page", page);
+    url.searchParams.set("pageSize", pageSize);
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (response.status === 200) {
+      if (data.articles.length === 0) {
+        throw new Error("검색 결과가 없습니다.");
+      }
+      newsList = data.articles;
+      totalResults = data.totalResults;
+      render();
+      paginationRender();
+    } else {
+      throw new Error(data.message);
+    }
+  } catch (error) {
+    errorRender(error.message);
+  }
+};
+
 const getLatesNews = async () => {
-  const url = new URL(
+  url = new URL(
     `https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=kr`
   );
-  const response = await fetch(url);
-  const data = await response.json();
-  newsList = data.articles;
-  render();
-  console.log("ddd", newsList);
+  getNews();
 };
 
 const getNewsByCategory = async (event) => {
   const category = event.target.textContent.toLowerCase();
-  console.log("category", category);
-  const url = new URL(
+  url = new URL(
     `https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=kr&category=${category}`
   );
-  const response = await fetch(url);
-  const data = await response.json();
-  console.log("ddd", data);
-  newsList = data.articles;
-  render();
+  getNews();
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -69,12 +92,11 @@ const attachEventListeners = () => {
     menu.addEventListener("click", getNewsByCategory)
   );
 
-  // 📌 사이드 메뉴 카테고리 클릭 이벤트 추가 + 메뉴 닫기
   const sideMenuCategories = document.querySelectorAll(".side-menu ul li");
   sideMenuCategories.forEach((menu) =>
     menu.addEventListener("click", (event) => {
-      getNewsByCategory(event); // 뉴스 리스트 업데이트
-      document.getElementById("side-menu").classList.remove("show"); // 사이드 메뉴 닫기
+      getNewsByCategory(event);
+      document.getElementById("side-menu").classList.remove("show");
     })
   );
 };
@@ -91,28 +113,12 @@ const getNewsByKeyword = async () => {
 
   if (!keyword) return alert("검색어를 입력해주세요.");
 
-  console.log("검색어:", keyword);
-
-  const url = new URL(
+  url = new URL(
     `https://noona-times-be-5ca9402f90d9.herokuapp.com/top-headlines?country=kr&q=${keyword}`
   );
 
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    console.log("검색 결과:", data);
-
-    if (data.articles.length === 0) {
-      alert("검색 결과가 없습니다.");
-    }
-
-    newsList = data.articles;
-    render();
-
-    searchInput.value = "";
-  } catch (error) {
-    console.error("검색 중 오류 발생:", error);
-  }
+  getNews();
+  searchInput.value = "";
 };
 
 // 200자 이상이면 ... 표기
@@ -159,5 +165,43 @@ const render = () => {
     .join("");
 
   document.getElementById("news-board").innerHTML = newsHTML;
+};
+
+const errorRender = (errorMessage) => {
+  const errorHTML = `<div class="alert alert-danger" role="alert">
+    ${errorMessage}
+  </div>`;
+
+  document.getElementById("news-board").innerHTML = errorHTML;
+};
+
+const paginationRender = () => {
+  const totalPages = Math.ceil(totalResults / pageSize);
+
+  const pageGroup = Math.ceil(page / groupSize);
+
+  let lastPage = pageGroup * groupSize;
+  if (lastPage > totalPages) {
+    lastPage = totalPages;
+  }
+
+  const firstPage =
+    lastPage - (groupSize - 1) <= 0 ? 1 : lastPage - (groupSize - 1);
+
+  let paginationHTML = ``;
+
+  for (let i = firstPage; i <= lastPage; i++) {
+    paginationHTML += `<li class="page-item ${i === page ? "active" : ""}"
+                            onclick="moveToPage(${i})">
+                            <a class="page-link">${i}</a>
+                       </li>`;
+  }
+  document.querySelector(".pagination").innerHTML = paginationHTML;
+};
+
+const moveToPage = (pageNum) => {
+  console.log("movetoPage", pageNum);
+  page = pageNum;
+  getNews();
 };
 getLatesNews();
