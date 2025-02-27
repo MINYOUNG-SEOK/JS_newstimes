@@ -204,5 +204,7 @@ const moveToPage = (pageNum) => {
   console.log("movetoPage", pageNum);
   page = pageNum;
   getNews();
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
 };
 getLatesNews();
